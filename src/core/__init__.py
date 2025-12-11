@@ -1,4 +1,8 @@
-"""Core domain models and enums for stock analysis."""
+"""
+Created on 2025.12.11
+
+@author: Matas Japertas
+"""
 
 from .enums import RebalanceFrequency, ReturnFrequency, ScoreStyle, ValuationMethod
 from .models import DCFResult, FundamentalsSnapshot, PortfolioStats, Stock

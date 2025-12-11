@@ -1,4 +1,8 @@
-"""Valuation helpers for price-to-earnings metrics."""
+"""
+Created on 2025.12.11
+
+@author: Matas Japertas
+"""
 
 from __future__ import annotations
 

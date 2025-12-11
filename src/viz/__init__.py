@@ -1,4 +1,8 @@
-"""Visualization helpers for stock_project."""
+"""
+Created on 2025.12.11
+
+@author: Matas Japertas
+"""
 
 from .plots import (
     plot_dca_balance,

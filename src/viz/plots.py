@@ -1,4 +1,8 @@
-"""Plotting utilities for valuation, DCA, and screening outputs."""
+"""
+Created on 2025.12.11
+
+@author: Matas Japertas
+"""
 
 from __future__ import annotations
 

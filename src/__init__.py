@@ -1,4 +1,8 @@
-"""Fundamental stock analysis and DCA simulations with Jupyter notebooks."""
+"""
+Created on 2025.12.11
+
+@author: Matas Japertas
+"""
 
 from .core.models import DCFResult, FundamentalsSnapshot, PortfolioStats, Stock
 

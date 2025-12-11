@@ -1,4 +1,8 @@
-"""Logging helpers for the stock_project package."""
+"""
+Created on 2025.12.11
+
+@author: Matas Japertas
+"""
 
 from __future__ import annotations
 

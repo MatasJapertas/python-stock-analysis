@@ -1,4 +1,8 @@
-"""Simple multi-ticker fundamentals screener."""
+"""
+Created on 2025.12.11
+
+@author: Matas Japertas
+"""
 
 from __future__ import annotations
 

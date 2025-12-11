@@ -1,4 +1,8 @@
-"""Data loading utilities for prices and fundamentals."""
+"""
+Created on 2025.12.11
+
+@author: Matas Japertas
+"""
 
 from .fundamentals import (
     get_balance_sheet,

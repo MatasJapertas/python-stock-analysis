@@ -1,4 +1,8 @@
-"""Core analysis modules for fundamentals, valuation, investment, and screening."""
+"""
+Created on 2025.12.11
+
+@author: Matas Japertas
+"""
 
 from .fundamentals import summarize_fundamentals
 from .investment import build_dca_balance_series, future_value_monthly, simulate_dca_monte_carlo
