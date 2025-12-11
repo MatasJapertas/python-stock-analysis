@@ -14,28 +14,22 @@ from ..utils import get_logger
 _logger = get_logger(__name__)
 
 
-def _get_row(df: pd.DataFrame | None, label: str) -> pd.Series | None:
-    """Safely retrieve a row by label."""
-
-    if df is None or df.empty or label not in df.index:
-        return None
-    return df.loc[label]
-
-
 def _get_eps_history(ticker_obj: yf.Ticker) -> pd.Series:
     """Return a historical EPS series from the ticker's financial statements."""
 
     quarterly_stmt = ticker_obj.quarterly_income_stmt
-    quarterly_eps = _get_row(quarterly_stmt, "Diluted EPS")
-    if quarterly_eps is not None and not quarterly_eps.empty:
-        quarterly_eps.index = pd.to_datetime(quarterly_eps.index)
-        return quarterly_eps.sort_index()
+    if quarterly_stmt is not None and not quarterly_stmt.empty:
+        eps_row = quarterly_stmt.loc.get("Diluted EPS")
+        if eps_row is not None and not eps_row.empty:
+            eps_row.index = pd.to_datetime(eps_row.index)
+            return eps_row.sort_index()
 
     annual_stmt = ticker_obj.income_stmt
-    annual_eps = _get_row(annual_stmt, "Diluted EPS")
-    if annual_eps is not None and not annual_eps.empty:
-        annual_eps.index = pd.to_datetime(annual_eps.index)
-        return annual_eps.sort_index()
+    if annual_stmt is not None and not annual_stmt.empty:
+        eps_row = annual_stmt.loc.get("Diluted EPS")
+        if eps_row is not None and not eps_row.empty:
+            eps_row.index = pd.to_datetime(eps_row.index)
+            return eps_row.sort_index()
 
     trailing_eps = ticker_obj.info.get("trailingEps")
     if trailing_eps is not None:
