@@ -14,10 +14,18 @@ import pandas as pd
 import yfinance as yf
 
 from ..core import FundamentalsSnapshot
-from ..data import get_company_info, get_income_statement
+from ..data import get_cashflow_statement, get_company_info, get_income_statement
 from ..utils import get_logger
 
 _logger = get_logger(__name__)
+
+
+def _get_row(df: pd.DataFrame | None, label: str) -> Optional[pd.Series]:
+    """Safely retrieve a row by label."""
+
+    if df is None or df.empty or label not in df.index:
+        return None
+    return df.loc[label]
 
 
 def safe_div(numerator: float | None, denominator: float | None) -> Optional[float]:
@@ -50,8 +58,8 @@ def cagr(start: float | None, end: float | None, years: float | None) -> Optiona
 def compute_revenue_cagr(income_stmt: pd.DataFrame) -> Optional[float]:
     if income_stmt is None or income_stmt.empty:
         return None
-    revenues = income_stmt.loc["Total Revenue"]
-    if revenues.empty:
+    revenues = _get_row(income_stmt, "Total Revenue")
+    if revenues is None or revenues.empty:
         return None
     years = max(len(revenues) - 1, 1)
     return cagr(revenues.iloc[-1], revenues.iloc[0], years)
@@ -60,7 +68,7 @@ def compute_revenue_cagr(income_stmt: pd.DataFrame) -> Optional[float]:
 def compute_fcf_cagr(cashflow: pd.DataFrame) -> Optional[float]:
     if cashflow is None or cashflow.empty:
         return None
-    fcf_series = cashflow.loc.get("Free Cash Flow")
+    fcf_series = _get_row(cashflow, "Free Cash Flow")
     if fcf_series is None or fcf_series.empty:
         return None
     years = max(len(fcf_series) - 1, 1)
@@ -70,10 +78,10 @@ def compute_fcf_cagr(cashflow: pd.DataFrame) -> Optional[float]:
 def compute_margins(income_stmt: pd.DataFrame) -> tuple[Optional[float], Optional[float], Optional[float]]:
     if income_stmt is None or income_stmt.empty:
         return None, None, None
-    revenue = income_stmt.loc.get("Total Revenue")
-    gross_profit = income_stmt.loc.get("Gross Profit")
-    operating_income = income_stmt.loc.get("Operating Income")
-    net_income = income_stmt.loc.get("Net Income")
+    revenue = _get_row(income_stmt, "Total Revenue")
+    gross_profit = _get_row(income_stmt, "Gross Profit")
+    operating_income = _get_row(income_stmt, "Operating Income")
+    net_income = _get_row(income_stmt, "Net Income")
 
     gross_margin = safe_div(gross_profit.iloc[0], revenue.iloc[0]) * 100 if gross_profit is not None else None
     operating_margin = safe_div(operating_income.iloc[0], revenue.iloc[0]) * 100 if operating_income is not None else None
@@ -118,8 +126,10 @@ def summarize_fundamentals(ticker: str) -> FundamentalsSnapshot:
     income_stmt = get_income_statement(ticker)
 
     market_cap = info.get("marketCap")
-    revenue = income_stmt.loc.get("Total Revenue").iloc[0] if "Total Revenue" in income_stmt.index else None
-    net_income = income_stmt.loc.get("Net Income").iloc[0] if "Net Income" in income_stmt.index else None
+    revenue_series = _get_row(income_stmt, "Total Revenue")
+    net_income_series = _get_row(income_stmt, "Net Income")
+    revenue = revenue_series.iloc[0] if revenue_series is not None else None
+    net_income = net_income_series.iloc[0] if net_income_series is not None else None
 
     eps = info.get("trailingEps")
     price = info.get("currentPrice")
@@ -129,8 +139,8 @@ def summarize_fundamentals(ticker: str) -> FundamentalsSnapshot:
     pfcf_ratio = compute_pfcf(price, info.get("fcfPerShare"))
     fcf_yield = compute_fcf_yield(fcf, market_cap)
 
-    revenue_cagr = None  # TODO: replace with compute_revenue_cagr(get_income_statement(ticker, annual=True))
-    fcf_cagr = None  # TODO: replace with compute_fcf_cagr(get_cashflow_statement(ticker, annual=True))
+    revenue_cagr = compute_revenue_cagr(get_income_statement(ticker, annual=True))
+    fcf_cagr = compute_fcf_cagr(get_cashflow_statement(ticker, annual=True))
     gross_margin, operating_margin, net_margin = compute_margins(income_stmt)
 
     value_score = compute_value_score(fcf_yield, pe_ratio)

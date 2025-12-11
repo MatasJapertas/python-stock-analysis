@@ -14,19 +14,47 @@ from ..utils import get_logger
 _logger = get_logger(__name__)
 
 
-def build_pe_series(ticker: str, period: str = "5y") -> pd.Series:
-    """Build a simple P/E ratio series using price history and trailing EPS.
+def _get_eps_history(ticker_obj: yf.Ticker) -> pd.Series:
+    """Return a historical EPS series from the ticker's financial statements."""
 
-    TODO: Enhance to use rolling EPS values over time instead of a single trailing value.
-    """
+    quarterly_stmt = ticker_obj.quarterly_income_stmt
+    if quarterly_stmt is not None and not quarterly_stmt.empty:
+        eps_row = quarterly_stmt.loc.get("Diluted EPS")
+        if eps_row is not None and not eps_row.empty:
+            eps_row.index = pd.to_datetime(eps_row.index)
+            return eps_row.sort_index()
+
+    annual_stmt = ticker_obj.income_stmt
+    if annual_stmt is not None and not annual_stmt.empty:
+        eps_row = annual_stmt.loc.get("Diluted EPS")
+        if eps_row is not None and not eps_row.empty:
+            eps_row.index = pd.to_datetime(eps_row.index)
+            return eps_row.sort_index()
+
+    trailing_eps = ticker_obj.info.get("trailingEps")
+    if trailing_eps is not None:
+        return pd.Series({pd.Timestamp.today().normalize(): trailing_eps})
+
+    return pd.Series(dtype=float)
+
+
+def build_pe_series(ticker: str, period: str = "5y") -> pd.Series:
+    """Build a P/E ratio series using historical prices and time-aware EPS."""
 
     ticker_obj = yf.Ticker(ticker)
     history = ticker_obj.history(period=period)
-    eps = ticker_obj.info.get("trailingEps")
-    if eps is None or eps == 0:
+    eps_history = _get_eps_history(ticker_obj)
+    if eps_history.empty:
         _logger.warning("Missing EPS for %s; cannot compute P/E series", ticker)
         return pd.Series(dtype=float)
-    pe_series = history["Close"] / eps
+
+    aligned_eps = eps_history.reindex(history.index, method="ffill")
+    aligned_eps = aligned_eps.replace(0, pd.NA)
+    if aligned_eps.isna().all():
+        _logger.warning("No usable EPS values for %s; cannot compute P/E series", ticker)
+        return pd.Series(dtype=float)
+
+    pe_series = history["Close"] / aligned_eps
     pe_series.name = f"{ticker} P/E"
     return pe_series
 
