@@ -21,8 +21,13 @@ def get_price_history(ticker: str, period: str = "5y", interval: str = "1d") -> 
     """Fetch historical prices for a single ticker."""
 
     _logger.info("Fetching price history for %s", ticker)
-    ticker_obj = yf.Ticker(ticker)
-    history = ticker_obj.history(period=period, interval=interval)
+    try:
+        ticker_obj = yf.Ticker(ticker)
+        history = ticker_obj.history(period=period, interval=interval)
+    except Exception as exc:  # yfinance can raise for network/API issues
+        _logger.error("Failed to fetch history for %s: %s", ticker, exc)
+        return pd.DataFrame()
+
     if history.empty:
         _logger.warning("No history returned for %s", ticker)
     return history
@@ -43,8 +48,13 @@ def get_current_price(ticker: str) -> float | None:
     """Fetch the latest closing price for a ticker."""
 
     _logger.info("Fetching current price for %s", ticker)
-    ticker_obj = yf.Ticker(ticker)
-    price = ticker_obj.fast_info.get("last_price") if hasattr(ticker_obj, "fast_info") else None
+    try:
+        ticker_obj = yf.Ticker(ticker)
+        price = ticker_obj.fast_info.get("last_price") if hasattr(ticker_obj, "fast_info") else None
+    except Exception as exc:
+        _logger.error("Failed to fetch current price for %s: %s", ticker, exc)
+        return None
+
     if price is None:
         _logger.warning("Could not fetch current price for %s", ticker)
     return price
