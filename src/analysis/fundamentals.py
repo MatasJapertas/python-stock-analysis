@@ -14,7 +14,7 @@ import pandas as pd
 import yfinance as yf
 
 from ..core import FundamentalsSnapshot
-from ..data import get_company_info, get_income_statement
+from ..data import get_cashflow_statement, get_company_info, get_income_statement
 from ..utils import get_logger
 
 _logger = get_logger(__name__)
@@ -129,8 +129,8 @@ def summarize_fundamentals(ticker: str) -> FundamentalsSnapshot:
     pfcf_ratio = compute_pfcf(price, info.get("fcfPerShare"))
     fcf_yield = compute_fcf_yield(fcf, market_cap)
 
-    revenue_cagr = None  # TODO: replace with compute_revenue_cagr(get_income_statement(ticker, annual=True))
-    fcf_cagr = None  # TODO: replace with compute_fcf_cagr(get_cashflow_statement(ticker, annual=True))
+    revenue_cagr = compute_revenue_cagr(get_income_statement(ticker, annual=True))
+    fcf_cagr = compute_fcf_cagr(get_cashflow_statement(ticker, annual=True))
     gross_margin, operating_margin, net_margin = compute_margins(income_stmt)
 
     value_score = compute_value_score(fcf_yield, pe_ratio)
