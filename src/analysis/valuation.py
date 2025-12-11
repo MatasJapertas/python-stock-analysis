@@ -17,23 +17,26 @@ _logger = get_logger(__name__)
 def _get_eps_history(ticker_obj: yf.Ticker) -> pd.Series:
     """Return a historical EPS series from the ticker's financial statements."""
 
-    quarterly_stmt = ticker_obj.quarterly_income_stmt
-    if quarterly_stmt is not None and not quarterly_stmt.empty:
-        eps_row = quarterly_stmt.loc.get("Diluted EPS")
-        if eps_row is not None and not eps_row.empty:
-            eps_row.index = pd.to_datetime(eps_row.index)
-            return eps_row.sort_index()
+    try:
+        quarterly_stmt = ticker_obj.quarterly_income_stmt
+        if quarterly_stmt is not None and not quarterly_stmt.empty:
+            eps_row = quarterly_stmt.loc.get("Diluted EPS")
+            if eps_row is not None and not eps_row.empty:
+                eps_row.index = pd.to_datetime(eps_row.index)
+                return eps_row.sort_index()
 
-    annual_stmt = ticker_obj.income_stmt
-    if annual_stmt is not None and not annual_stmt.empty:
-        eps_row = annual_stmt.loc.get("Diluted EPS")
-        if eps_row is not None and not eps_row.empty:
-            eps_row.index = pd.to_datetime(eps_row.index)
-            return eps_row.sort_index()
+        annual_stmt = ticker_obj.income_stmt
+        if annual_stmt is not None and not annual_stmt.empty:
+            eps_row = annual_stmt.loc.get("Diluted EPS")
+            if eps_row is not None and not eps_row.empty:
+                eps_row.index = pd.to_datetime(eps_row.index)
+                return eps_row.sort_index()
 
-    trailing_eps = ticker_obj.info.get("trailingEps")
-    if trailing_eps is not None:
-        return pd.Series({pd.Timestamp.today().normalize(): trailing_eps})
+        trailing_eps = ticker_obj.info.get("trailingEps") if hasattr(ticker_obj, "info") else None
+        if trailing_eps is not None:
+            return pd.Series({pd.Timestamp.today().normalize(): trailing_eps})
+    except Exception as exc:
+        _logger.error("Failed to fetch EPS history: %s", exc)
 
     return pd.Series(dtype=float)
 
@@ -42,7 +45,12 @@ def build_pe_series(ticker: str, period: str = "5y") -> pd.Series:
     """Build a P/E ratio series using historical prices and time-aware EPS."""
 
     ticker_obj = yf.Ticker(ticker)
-    history = ticker_obj.history(period=period)
+    try:
+        history = ticker_obj.history(period=period)
+    except Exception as exc:
+        _logger.error("Failed to fetch price history for %s: %s", ticker, exc)
+        return pd.Series(dtype=float)
+
     eps_history = _get_eps_history(ticker_obj)
     if eps_history.empty:
         _logger.warning("Missing EPS for %s; cannot compute P/E series", ticker)

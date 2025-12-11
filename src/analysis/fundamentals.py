@@ -83,9 +83,24 @@ def compute_margins(income_stmt: pd.DataFrame) -> tuple[Optional[float], Optiona
     operating_income = _get_row(income_stmt, "Operating Income")
     net_income = _get_row(income_stmt, "Net Income")
 
-    gross_margin = safe_div(gross_profit.iloc[0], revenue.iloc[0]) * 100 if gross_profit is not None else None
-    operating_margin = safe_div(operating_income.iloc[0], revenue.iloc[0]) * 100 if operating_income is not None else None
-    net_margin = safe_div(net_income.iloc[0], revenue.iloc[0]) * 100 if net_income is not None else None
+    if revenue is None or revenue.empty:
+        return None, None, None
+
+    gross_margin = (
+        safe_div(gross_profit.iloc[0], revenue.iloc[0]) * 100
+        if gross_profit is not None and not gross_profit.empty
+        else None
+    )
+    operating_margin = (
+        safe_div(operating_income.iloc[0], revenue.iloc[0]) * 100
+        if operating_income is not None and not operating_income.empty
+        else None
+    )
+    net_margin = (
+        safe_div(net_income.iloc[0], revenue.iloc[0]) * 100
+        if net_income is not None and not net_income.empty
+        else None
+    )
     return gross_margin, operating_margin, net_margin
 
 
@@ -128,8 +143,8 @@ def summarize_fundamentals(ticker: str) -> FundamentalsSnapshot:
     market_cap = info.get("marketCap")
     revenue_series = _get_row(income_stmt, "Total Revenue")
     net_income_series = _get_row(income_stmt, "Net Income")
-    revenue = revenue_series.iloc[0] if revenue_series is not None else None
-    net_income = net_income_series.iloc[0] if net_income_series is not None else None
+    revenue = revenue_series.iloc[0] if revenue_series is not None and not revenue_series.empty else None
+    net_income = net_income_series.iloc[0] if net_income_series is not None and not net_income_series.empty else None
 
     eps = info.get("trailingEps")
     price = info.get("currentPrice")
