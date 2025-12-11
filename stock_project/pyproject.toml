@@ -1,0 +1,19 @@
+[project]
+name = "stock_project"
+version = "0.1.0"
+description = "Fundamental stock analysis and DCA simulations"
+readme = "README.md"
+authors = [{name = "Your Name", email = "you@example.com"}]
+requires-python = ">=3.11"
+dependencies = [
+    "yfinance",
+    "pandas",
+    "numpy",
+    "matplotlib",
+    "ipywidgets",
+    "jupyter",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
