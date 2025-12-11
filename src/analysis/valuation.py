@@ -72,6 +72,8 @@ def compute_rolling_pe(pe: pd.Series, window_days: int = 30) -> pd.Series:
 
     if pe.empty:
         return pe
+    if isinstance(pe.index, pd.DatetimeIndex):
+        return pe.rolling(window=f"{window_days}D", min_periods=1).mean()
     return pe.rolling(window=window_days, min_periods=1).mean()
 
 

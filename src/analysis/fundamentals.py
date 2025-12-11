@@ -141,15 +141,15 @@ def summarize_fundamentals(ticker: str) -> FundamentalsSnapshot:
     income_stmt = get_income_statement(ticker)
 
     market_cap = info.get("marketCap")
+    trailing_eps = info.get("trailingEps")
     revenue_series = _get_row(income_stmt, "Total Revenue")
     net_income_series = _get_row(income_stmt, "Net Income")
     revenue = revenue_series.iloc[0] if revenue_series is not None and not revenue_series.empty else None
     net_income = net_income_series.iloc[0] if net_income_series is not None and not net_income_series.empty else None
 
-    eps = info.get("trailingEps")
     price = info.get("currentPrice")
 
-    pe_ratio = compute_pe(price, eps)
+    pe_ratio = compute_pe(price, trailing_eps)
     fcf = info.get("freeCashflow")
     pfcf_ratio = compute_pfcf(price, info.get("fcfPerShare"))
     fcf_yield = compute_fcf_yield(fcf, market_cap)
@@ -165,6 +165,7 @@ def summarize_fundamentals(ticker: str) -> FundamentalsSnapshot:
 
     return FundamentalsSnapshot(
         ticker=ticker,
+        trailing_eps=trailing_eps,
         market_cap=market_cap,
         revenue=revenue,
         free_cash_flow=fcf,

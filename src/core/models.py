@@ -28,6 +28,7 @@ class FundamentalsSnapshot:
     """Simplified snapshot of fundamental metrics for a given stock."""
 
     ticker: str
+    trailing_eps: Optional[float]
     market_cap: Optional[float]
     revenue: Optional[float]
     free_cash_flow: Optional[float]
