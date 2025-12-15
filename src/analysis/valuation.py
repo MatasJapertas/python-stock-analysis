@@ -20,14 +20,14 @@ def _get_eps_history(ticker_obj: yf.Ticker) -> pd.Series:
     try:
         quarterly_stmt = ticker_obj.quarterly_income_stmt
         if quarterly_stmt is not None and not quarterly_stmt.empty:
-            eps_row = quarterly_stmt.loc.get("Diluted EPS")
+            eps_row = quarterly_stmt.loc["Diluted EPS"] if "Diluted EPS" in quarterly_stmt.index else None
             if eps_row is not None and not eps_row.empty:
                 eps_row.index = pd.to_datetime(eps_row.index)
                 return eps_row.sort_index()
 
         annual_stmt = ticker_obj.income_stmt
         if annual_stmt is not None and not annual_stmt.empty:
-            eps_row = annual_stmt.loc.get("Diluted EPS")
+            eps_row = annual_stmt.loc["Diluted EPS"] if "Diluted EPS" in annual_stmt.index else None
             if eps_row is not None and not eps_row.empty:
                 eps_row.index = pd.to_datetime(eps_row.index)
                 return eps_row.sort_index()
@@ -56,6 +56,17 @@ def build_pe_series(ticker: str, period: str = "5y") -> pd.Series:
         _logger.warning("Missing EPS for %s; cannot compute P/E series", ticker)
         return pd.Series(dtype=float)
 
+    if isinstance(eps_history.index, pd.DatetimeIndex):
+        hist_tz = history.index.tz
+        eps_index = eps_history.index
+        if hist_tz is not None:
+            eps_index = eps_index.tz_localize(hist_tz) if eps_index.tz is None else eps_index.tz_convert(hist_tz)
+        elif eps_index.tz is not None:
+            eps_index = eps_index.tz_convert(None)
+
+        eps_history = eps_history.copy()
+        eps_history.index = eps_index
+
     aligned_eps = eps_history.reindex(history.index, method="ffill")
     aligned_eps = aligned_eps.replace(0, pd.NA)
     if aligned_eps.isna().all():
@@ -82,9 +93,10 @@ def compute_pe_stats(pe: pd.Series) -> dict[str, float]:
 
     if pe.empty:
         return {"mean": float("nan"), "median": float("nan"), "min": float("nan"), "max": float("nan")}
-    return {
+    raw_stats = {
         "mean": pe.mean(),
         "median": pe.median(),
         "min": pe.min(),
         "max": pe.max(),
     }
+    return {key: float(value) for key, value in raw_stats.items()}
