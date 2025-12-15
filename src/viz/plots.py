@@ -54,13 +54,18 @@ def plot_monte_carlo_histogram(final_values: np.ndarray, bins: int = 30, title: 
 
 def plot_screener_bar(df: pd.DataFrame, column: str, top_n: int = 10, title: str | None = None) -> Figure:
     """Plot a bar chart for screener scores."""
+    if column not in df.columns:
+        available = ", ".join(df.columns)
+        raise ValueError(f"Column '{column}' not found in DataFrame. Available columns: {available}")
 
     fig, ax = plt.subplots()
     subset = df.nlargest(top_n, column)
-    ax.bar(subset["ticker"], subset[column])
+    positions = np.arange(len(subset))
+    ax.bar(positions, subset[column])
     ax.set_title(title or f"Top {top_n} by {column}")
     ax.set_xlabel("Ticker")
     ax.set_ylabel(column)
+    ax.set_xticks(positions)
     ax.set_xticklabels(subset["ticker"], rotation=45, ha="right")
     ax.grid(True, axis="y")
     return fig

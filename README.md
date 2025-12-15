@@ -232,7 +232,7 @@ plt.close(pe_fig)
 
 # Quick screener overview
 results = run_simple_screener(["AAPL", "MSFT", "GOOGL", "AMZN", "META"])
-bar_fig = plot_screener_bar(results, column="score_composite", top_n=5)
+bar_fig = plot_screener_bar(results, column="pe_ration", top_n=5)
 bar_fig.savefig("screener.png", dpi=150)
 plt.close(bar_fig)
 ```
