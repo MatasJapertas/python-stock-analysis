@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import pandas as pd
 
-from ..core import FundamentalsSnapshot
-from ..utils import get_logger
+from core import FundamentalsSnapshot
+from utils import get_logger
 from .fundamentals import summarize_fundamentals
 
 _logger = get_logger(__name__)

@@ -9,7 +9,7 @@ from __future__ import annotations
 import pandas as pd
 import yfinance as yf
 
-from ..utils import get_logger
+from utils import get_logger
 
 _logger = get_logger(__name__)
 

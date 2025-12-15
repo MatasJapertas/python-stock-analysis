@@ -13,9 +13,9 @@ from typing import Optional
 import pandas as pd
 import yfinance as yf
 
-from ..core import FundamentalsSnapshot
-from ..data import get_cashflow_statement, get_company_info, get_income_statement
-from ..utils import get_logger
+from core import FundamentalsSnapshot
+from data import get_cashflow_statement, get_company_info, get_income_statement
+from utils import get_logger
 
 _logger = get_logger(__name__)
 
