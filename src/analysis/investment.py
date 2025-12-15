@@ -40,8 +40,7 @@ def simulate_dca_monte_carlo(
     years: float,
     annual_return_mean: float,
     annual_return_std: float,
-    n_sims: int = 1000,
-) -> np.ndarray:
+    n_sims: int = 1000) -> np.ndarray:
     """Simulate DCA outcomes using log-normal return paths."""
 
     periods = int(years * 12)
