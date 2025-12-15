@@ -1,3 +1,9 @@
+"""
+Created on 2025.12.15
+
+@author: Matas Japertas
+"""
+
 from __future__ import annotations
 
 import pandas as pd

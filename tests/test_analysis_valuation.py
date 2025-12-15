@@ -1,3 +1,9 @@
+"""
+Created on 2025.12.15
+
+@author: Matas Japertas
+"""
+
 import math
 
 import pandas as pd

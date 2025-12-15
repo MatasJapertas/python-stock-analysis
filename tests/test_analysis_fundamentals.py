@@ -1,3 +1,9 @@
+"""
+Created on 2025.12.15
+
+@author: Matas Japertas
+"""
+
 from datetime import date
 
 import pandas as pd
