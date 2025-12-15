@@ -7,7 +7,6 @@ Created on 2025.12.11
 from __future__ import annotations
 
 import math
-from typing import Iterable
 
 import numpy as np
 

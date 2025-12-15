@@ -6,7 +6,6 @@ Created on 2025.12.11
 
 from __future__ import annotations
 
-import logging
 from typing import Iterable
 
 import pandas as pd

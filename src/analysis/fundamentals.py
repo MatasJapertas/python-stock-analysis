@@ -6,12 +6,10 @@ Created on 2025.12.11
 
 from __future__ import annotations
 
-import math
 from datetime import date
 from typing import Optional
 
 import pandas as pd
-import yfinance as yf
 
 from ..core import FundamentalsSnapshot
 from ..data import get_cashflow_statement, get_company_info, get_income_statement

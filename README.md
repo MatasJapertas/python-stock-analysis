@@ -173,6 +173,31 @@ results = simulate_dca_monte_carlo(500, years=5, annual_return_mean=0.07, annual
 stats = summarize_monte_carlo_results(results, target=50000)
 print(stats)
 ```
+Monte Carlo distribution and expected return visualization example:
+```python
+import matplotlib.pyplot as plt
+
+from src.analysis.investment import build_dca_balance_series, simulate_dca_monte_carlo
+from src.viz import plot_dca_balance, plot_monte_carlo_histogram
+
+# Expected compound-interest path for $300 monthly contributions at 8% annual return
+balances = build_dca_balance_series(300, annual_rate=0.08, years=10)
+fig = plot_dca_balance(balances, years=10, title="Expected Compound Growth ($300/mo @ 8%)")
+fig.savefig("compound_growth.png", dpi=150)
+plt.close(fig)
+
+# Monte Carlo distribution of ending balances to visualize uncertainty
+simulated = simulate_dca_monte_carlo(
+    monthly_contribution=300,
+    years=10,
+    annual_return_mean=0.08,
+    annual_return_std=0.14,
+    n_sims=2000,
+)
+hist_fig = plot_monte_carlo_histogram(simulated, bins=40, title="Monte Carlo Ending Balance Distribution")
+hist_fig.savefig("monte_carlo_distribution.png", dpi=150)
+plt.close(hist_fig)
+```
 
 ---
 ## Visualization helpers (`src/viz/plots.py`)

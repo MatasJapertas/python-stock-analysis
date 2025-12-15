@@ -27,6 +27,45 @@ def plot_pe_with_rolling(pe: pd.Series, rolling_pe: pd.Series | None = None, tit
     return fig
 
 
+def plot_multiple_pe(pe_map: dict[str, pd.Series], title: str | None = None) -> Figure:
+    """Overlay multiple P/E ratio series on the same axis."""
+
+    fig, ax = plt.subplots()
+    for label, series in pe_map.items():
+        if series is None or series.empty:
+            continue
+        series.plot(ax=ax, label=label)
+
+    ax.set_title(title or "P/E Comparison")
+    ax.set_xlabel("Date")
+    ax.set_ylabel("P/E")
+    ax.legend()
+    ax.grid(True)
+    return fig
+
+
+def plot_price_history(prices: pd.DataFrame | pd.Series, value_column: str = "Close", title: str | None = None) -> Figure:
+    """Plot a share's value over time."""
+
+    fig, ax = plt.subplots()
+    if isinstance(prices, pd.Series):
+        prices.plot(ax=ax, label=value_column)
+    else:
+        if value_column not in prices.columns:
+            available = ", ".join(prices.columns)
+            raise ValueError(
+                f"Column '{value_column}' not found in prices DataFrame. Available columns: {available}"
+            )
+        prices[value_column].plot(ax=ax, label=value_column)
+
+    ax.set_title(title or "Share Value Over Time")
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Price")
+    ax.legend()
+    ax.grid(True)
+    return fig
+
+
 def plot_dca_balance(balances: list[float], years: int, title: str | None = None) -> Figure:
     """Plot DCA balance growth over time."""
 
@@ -68,4 +107,18 @@ def plot_screener_bar(df: pd.DataFrame, column: str, top_n: int = 10, title: str
     ax.set_xticks(positions)
     ax.set_xticklabels(subset["ticker"], rotation=45, ha="right")
     ax.grid(True, axis="y")
+    return fig
+
+def plot_fcf_growth_histogram(fcf_series: pd.Series, title: str | None = None) -> Figure:
+    """Plot histogram of year-over-year free cash flow growth rates (percent)."""
+
+    sorted_series = fcf_series.sort_index()
+    growth_rates = sorted_series.pct_change().dropna() * 100
+
+    fig, ax = plt.subplots()
+    ax.hist(growth_rates, bins=min(30, max(len(growth_rates), 1)), color="seagreen", alpha=0.75)
+    ax.set_title(title or "Free Cash Flow Growth Distribution")
+    ax.set_xlabel("YoY Growth (%)")
+    ax.set_ylabel("Frequency")
+    ax.grid(True)
     return fig
