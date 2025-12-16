@@ -122,3 +122,37 @@ def plot_fcf_growth_histogram(fcf_series: pd.Series, title: str | None = None) -
     ax.set_ylabel("Frequency")
     ax.grid(True)
     return fig
+
+def plot_multiple_price_histories(
+    price_map: dict[str, pd.DataFrame | pd.Series],
+    value_column: str = "Close",
+    title: str | None = None,
+) -> Figure:
+    """Overlay multiple share price histories on the same chart."""
+
+    fig, ax = plt.subplots()
+    for label, prices in price_map.items():
+        if prices is None:
+            continue
+
+        if isinstance(prices, pd.Series):
+            series = prices
+        else:
+            if value_column not in prices.columns:
+                available = ", ".join(prices.columns)
+                raise ValueError(
+                    f"Column '{value_column}' not found in prices DataFrame. Available columns: {available}"
+                )
+            series = prices[value_column]
+
+        if series.empty:
+            continue
+
+        series.plot(ax=ax, label=label)
+
+    ax.set_title(title or "Share Prices Over Time")
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Price")
+    ax.legend()
+    ax.grid(True)
+    return fig
